@@ -62,7 +62,7 @@ jobs:
       - name: Test Crossref polite pool email policy
         run: node economics-firefox/tests/polite-email.test.cjs
 
-      - name: Test DOI-based queries and API diagnostic
+      - name: Test DOI-based Crossref requests
         run: node economics-firefox/tests/crossref-doi.test.cjs
 
       - name: Build Firefox XPI

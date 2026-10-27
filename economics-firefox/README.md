@@ -65,3 +65,6 @@ Official documentation: https://www.crossref.org/documentation/retrieve-metadata
 - When a Google Scholar title hyperlink includes a publisher DOI, the background first queries `/works/{DOI}`, and still verifies paper title, year, and author before using the journal `container-title`. A 404 or title mismatch falls back to title search. Rate limit/server errors do not trigger a second request.
 - All Crossref lookups remain opt-out, batched sequentially, cached locally. API queries are rate paced to avoid overloading the public service.
 - Your test paper: DOI `10.1002/joom.70037` published in Journal of Operations Management (publisher-verified); should receive FT50 and UTD24 when the journal metadata can be resolved.
+
+## v0.4.0 streamlined settings
+Only TOP5, FT50, UTD24 and school rankings are shown; Chinese CSSCI / PKU Core / AMI badges have been disabled in display logic. Crossref metadata resolution runs automatically in the background without a visible toggle. The connection-test button and its network probe handler were removed. Optional email is available in collapsed advanced settings. The settings use responsive two-column cards; school CSV import is under a separate collapsible section.

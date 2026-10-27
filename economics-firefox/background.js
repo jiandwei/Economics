@@ -53,25 +53,6 @@ async function retrieve(query) {
     shouldCache:true
   };
 }
-async function testCrossrefConnection() {
-  const data = await browser.storage.local.get('crossrefEmail').catch(() => ({}));
-  const validEmail = econNormalizeContactEmail(data.crossrefEmail);
-  const url = econCrossrefProbeUrl(validEmail);
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(),7000);
-  try {
-    const response = await fetch(url,{signal:controller.signal,cache:'no-store'});
-    const pool = String(response.headers.get('x-api-pool') || '').toLowerCase();
-    return {
-      ok:response.ok,
-      status:response.status,
-      pool: ['polite','public'].includes(pool) ? pool : 'unknown',
-      emailConfigured:!!validEmail
-    };
-  } catch (_) {
-    return {ok:false,status:null,pool:'unknown',emailConfigured:!!validEmail};
-  } finally {clearTimeout(timer);}
-}
 async function resolve(query) {
   const key = econNormalTitle(query.title) + '|' + query.year + '|' + econNormalTitle(query.author) + '|' + (query.doi || '');
   const cache = await getCache();
@@ -96,12 +77,6 @@ async function resolve(query) {
   try { return await task; } finally { pending.delete(key); }
 }
 browser.runtime.onMessage.addListener((msg,sender) => {
-  // Only the extension's own settings page may run a connection diagnostic.
-  if (msg?.type === 'econ.testCrossref') {
-    const ownedUrl = browser.runtime.getURL('');
-    if (String(sender?.url || '').startsWith(ownedUrl)) return testCrossrefConnection();
-    return;
-  }
   if (!valid(msg) ||
       !/^https:\/\/scholar\.google\.[a-z.]+(?:\/|$)/i.test(String(sender?.url || ''))) return;
   return resolve({
