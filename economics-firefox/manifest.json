@@ -21,7 +21,16 @@
   "content_scripts": [
     {
       "matches": [
-        "*://scholar.google.*/*",
+        "*://scholar.google.com/*",
+        "*://scholar.google.com.hk/*",
+        "*://scholar.google.co.uk/*",
+        "*://scholar.google.com.au/*",
+        "*://scholar.google.ca/*",
+        "*://scholar.google.de/*",
+        "*://scholar.google.fr/*",
+        "*://scholar.google.co.jp/*",
+        "*://scholar.google.com.sg/*",
+        "*://scholar.google.com.tw/*",
         "*://dblp.org/*",
         "*://dblp.uni-trier.de/*",
         "*://www.webofscience.com/*",
