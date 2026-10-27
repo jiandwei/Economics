@@ -39,3 +39,6 @@ FT50 is a business-school research journal basket, not a ranking of strictly eco
 - Reference: PKU Core 2023 https://www.wifa.edu.cn/upload/20240923/d4b8a60dc932f2593f8fb7322a2aa0b2.pdf
 - AMI source should be independently checked before formal use.
 - CNKI changes site layout periodically; selectors need testing on your logged-in browser.
+
+## v0.2.1 CNKI display correction
+CNKI search-table badges now render *inside* the `td.source` cell under the journal title. This fixes accidental placement under the publication date caused by adding a `span` as a sibling of `td`. The tests cover source-column containment, distinct similar titles, repeated scans and updated results.

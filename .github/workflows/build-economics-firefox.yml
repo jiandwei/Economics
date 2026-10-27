@@ -53,6 +53,9 @@ jobs:
       - name: Test journal recognition
         run: node economics-firefox/tests/matching.test.cjs
 
+      - name: Test CNKI badge placement
+        run: node economics-firefox/tests/cnki-layout.test.cjs
+
       - name: Build Firefox XPI
         shell: bash
         run: |
