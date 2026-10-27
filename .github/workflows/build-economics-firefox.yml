@@ -1,0 +1,72 @@
+name: Build Firefox XPI
+
+on:
+  push:
+    branches:
+      - feature/economics-journal-firefox
+    tags:
+      - "economics-v*"
+    paths:
+      - "economics-firefox/**"
+      - ".github/workflows/build-economics-firefox.yml"
+  pull_request:
+    paths:
+      - "economics-firefox/**"
+      - ".github/workflows/build-economics-firefox.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Validate and package Firefox extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check manifest and JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root = Path("economics-firefox")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          assert manifest["manifest_version"] == 3
+          assert manifest["browser_specific_settings"]["gecko"]["id"]
+          for script in manifest["content_scripts"]:
+              for field in ("js", "css"):
+                  for file in script.get(field, []):
+                      assert (root / file).is_file(), f"Missing {field} file: {file}"
+          for file in manifest["background"].get("scripts", []):
+              assert (root / file).is_file(), f"Missing background script: {file}"
+          assert (root / manifest["options_ui"]["page"]).is_file()
+          print("Firefox manifest and referenced files OK")
+          PY
+          while IFS= read -r -d '' script; do
+            node --check "$script"
+          done < <(find economics-firefox -type f -name '*.js' -print0)
+
+      - name: Build Firefox XPI
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(python3 -c 'import json;print(json.load(open("economics-firefox/manifest.json", encoding="utf-8"))["version"])')
+          mkdir -p dist
+          ( cd economics-firefox && zip -q -r "../dist/Economics-Journal-Tags-Firefox-${VERSION}.xpi" manifest.json background.js data js css options.html options.js options.css )
+          unzip -t "dist/Economics-Journal-Tags-Firefox-${VERSION}.xpi"
+          unzip -Z -1 "dist/Economics-Journal-Tags-Firefox-${VERSION}.xpi" | grep -qx 'manifest.json'
+          sha256sum dist/*.xpi | tee dist/SHA256SUMS
+
+      - name: Upload unsigned test XPI
+        uses: actions/upload-artifact@v4
+        with:
+          name: economics-journal-tags-firefox
+          path: |
+            dist/*.xpi
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 90
