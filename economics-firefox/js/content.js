@@ -68,8 +68,10 @@
     document.querySelectorAll('.gs_ri').forEach(result => {
       const source = result.querySelector('.gs_a');
       if (!source) return;
-      const parts = source.textContent.split(/\s[-–]\s/);
-      if (parts.length >= 2) decorate(source, parts[1]);
+      const parts = source.textContent.split(/\s[-–—]\s/);
+      // Journal abbreviations are in the venue metadata, not the paper title.
+      // Some Scholar layouts omit the author/venue separator entirely.
+      decorate(source, parts.length >= 2 ? parts[1] : source.textContent);
     });
     // Scholar profiles: first .gs_gray lists authors, second lists venue.
     document.querySelectorAll('tr.gsc_a_tr').forEach(result => {

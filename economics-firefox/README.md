@@ -42,3 +42,7 @@ FT50 is a business-school research journal basket, not a ranking of strictly eco
 
 ## v0.2.1 CNKI display correction
 CNKI search-table badges now render *inside* the `td.source` cell under the journal title. This fixes accidental placement under the publication date caused by adding a `span` as a sibling of `td`. The tests cover source-column containment, distinct similar titles, repeated scans and updated results.
+
+## v0.2.2 – Journal of Operations Management
+
+Both `FT50` and `UTD24` contain **Journal of Operations Management**. Recognizes its full name and common source-field abbreviations (`J Oper Manag`, `J. Oper. Manage.`, `J Operations Manag`, `JOM` when isolated), including English-language venues displayed in CNKI's source column. Improved Google Scholar metadata extraction when the author/venue separator is absent or uses an em dash. Tests assert both classifications and guard against false positives.

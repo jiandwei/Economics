@@ -51,12 +51,13 @@ function rowWithSource(name, linked = true) {
 const first = rowWithSource('世界经济研究');
 const second = rowWithSource('世界经济');
 const third = rowWithSource('南开经济研究', false);
+const fourth = rowWithSource('Journal of Operations Management');
 let scanCallback;
 const context = vm.createContext({
   document: {
     body: {},
     createElement: tag => new Element(tag),
-    querySelectorAll: selector => selector === '.result-table-list tbody tr' ? [first.row, second.row, third.row] : []
+    querySelectorAll: selector => selector === '.result-table-list tbody tr' ? [first.row, second.row, third.row, fourth.row] : []
   },
   browser: {
     storage: {
@@ -79,7 +80,10 @@ for (const filename of ['data/journals.js', 'data/chinese-journals.js', 'js/matc
   assert.ok(wrap(first.cell), 'CSSCI badge must render inside source cell');
   assert.ok(wrap(second.cell), 'Second journal badges must render');
   assert.ok(wrap(third.cell), 'Non-linked source cell must render');
-  for (const fixture of [first, second, third]) {
+  assert.ok(wrap(fourth.cell), 'English source inside CNKI must render');
+  assert.ok(wrap(fourth.cell).textContent.includes('FT50'), 'Journal of Operations Management FT50');
+  assert.ok(wrap(fourth.cell).textContent.includes('UTD24'), 'Journal of Operations Management UTD24');
+  for (const fixture of [first, second, third, fourth]) {
     assert.equal(fixture.row.children.length, 1, 'No extra child may appear alongside td');
     assert.equal(wrap(fixture.cell).parentNode, fixture.cell, 'Badges must be children of source td');
   }

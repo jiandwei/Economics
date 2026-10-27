@@ -31,3 +31,28 @@ for(const [venue,want]of chineseCases){const got=check('matches('+JSON.stringify
 const school=check("matches('中国财政研究',catalog([{title:'中国财政研究',level:'A类',cssci:'是',pku:'是',ami:'核心'}]))[0]");
 assert.equal(school.school,'A类');assert.ok(school.groups.includes('cssci'));assert.ok(school.groups.includes('pku'));assert.equal(school.ami,'核心');
 console.log('Chinese journal tests passed:',chineseCases.length+1);
+
+const operationsCases = [
+  'Journal of Operations Management',
+  'JOURNAL OF OPERATIONS MANAGEMENT, 2026',
+  'J Oper Manag, 2025 - Wiley',
+  'J. Oper. Manag., 2024 - Wiley',
+  'J. Oper. Manage. 2023',
+  'J Operations Manag, 2022',
+  'J. Operations Manage. 2021',
+  'Journal of Oper Manag, 2020',
+  'JOM',
+  'JOM 2025'
+];
+for (const source of operationsCases) {
+  const found = check('matches(' + JSON.stringify(source) + ', catalog([]))');
+  assert.equal(found.length, 1, source);
+  assert.equal(found[0].title, 'Journal of Operations Management', source);
+  assert.ok(found[0].groups.includes('utd24'), source + ' should be UTD24');
+  assert.ok(found[0].groups.includes('ft50'), source + ' should be FT50');
+}
+for (const source of ['Operations Management Review', 'Journal of Operations Research', 'JOM on consulting']) {
+  const found = check('matches(' + JSON.stringify(source) + ', catalog([]))');
+  assert.ok(!found.length || found[0].title !== 'Journal of Operations Management', source + ' false positive');
+}
+console.log('Operations management journal tests passed:', operationsCases.length + 3);
