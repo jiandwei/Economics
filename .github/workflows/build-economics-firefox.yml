@@ -56,6 +56,9 @@ jobs:
       - name: Test CNKI badge placement
         run: node economics-firefox/tests/cnki-layout.test.cjs
 
+      - name: Test Crossref metadata resolution
+        run: node economics-firefox/tests/crossref.test.cjs
+
       - name: Build Firefox XPI
         shell: bash
         run: |

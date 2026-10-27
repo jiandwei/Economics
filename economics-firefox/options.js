@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-const keys=['top5','ft50','utd24','cssci','pku','ami','school'], cols=['title','level','cssci','pku','ami'];
+const keys=['top5','ft50','utd24','cssci','pku','ami','school','crossrefResolve'], cols=['title','level','cssci','pku','ami'];
 const aliases={'title':'title','期刊名称':'title','刊名':'title','期刊':'title','journal':'title','level':'level','学校等级':'level','等级':'level','cssci':'cssci','c刊':'cssci','pku':'pku','北大核心':'pku','ami':'ami'};
 function cells(text){const out=[];let row=[],field='',quoted=false;text=String(text).replace(/^\uFEFF/,'');
 for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quoted&&text[i+1]==='"'){field+='"';i++}else quoted=!quoted;}else if(!quoted&&(c===','||c==='\n'||c==='\r')){row.push(field.trim());field='';if(c!==','){if(row.some(Boolean))out.push(row);row=[];if(c==='\r'&&text[i+1]==='\n')i++;}}else field+=c;}

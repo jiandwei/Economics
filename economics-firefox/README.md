@@ -46,3 +46,9 @@ CNKI search-table badges now render *inside* the `td.source` cell under the jour
 ## v0.2.2 – Journal of Operations Management
 
 Both `FT50` and `UTD24` contain **Journal of Operations Management**. Recognizes its full name and common source-field abbreviations (`J Oper Manag`, `J. Oper. Manage.`, `J Operations Manag`, `JOM` when isolated), including English-language venues displayed in CNKI's source column. Improved Google Scholar metadata extraction when the author/venue separator is absent or uses an em dash. Tests assert both classifications and guard against false positives.
+
+## v0.3.0 – CCFrank-inspired metadata lookup
+
+CCFrank4dblp obtains Scholar paper titles and sends independent DBLP API requests; it does not capture private Scholar traffic. Here the economics extension uses Crossref REST API by article title when Scholar's venue is visibly truncated. Crossref provides the complete container-title; existing local rankings assign FT50/UTD24/TOP5 badges. Requests are sent by the Firefox background script, limited to eight per page and serialized, with a 30-day positive/1-day negative browser-local cache. We require closely matched title, publication year when known, and author when present, and reject ambiguous records. A missing Crossref record cannot be labelled. The settings panel allows opting out of external lookups; this feature sends the public article title, year and author to api.crossref.org, not Scholar cookies or CNKI data.
+
+Crossref docs: https://www.crossref.org/documentation/retrieve-metadata/rest-api/

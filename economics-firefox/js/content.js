@@ -10,6 +10,8 @@
   const ranks = catalog(store.schoolJournals);
   const classes = { top5: 'econ-top5', ft50: 'econ-ft50', utd24: 'econ-utd', cssci: 'econ-cssci', pku: 'econ-pku' };
   const names = { top5: 'TOP5', ft50: 'FT50', utd24: 'UTD24', cssci: 'CSSCI', pku: '北大核心' };
+  let crossrefCount = 0;
+  const CROSSREF_PAGE_LIMIT = 8;
 
   function decorate(target, venue, mountInside = null) {
     if (!target || !venue) return;
@@ -63,20 +65,49 @@
     }
     target.dataset.econTagged = '1';
   }
-  // Scholar's .gs_a combines authors – venue, year – publisher.
+  // CCFrank-style fallback: resolve a canonical journal from paper metadata.
+  function scholarLookup(target, currentText, venue, title, author, year) {
+    if (store.enabled?.crossrefResolve === false || !/(?:…|\.{3})/.test(venue)) return;
+    if (!title || title.length < 14 || title.includes('…') || title.includes('...')) return;
+    if (crossrefCount >= CROSSREF_PAGE_LIMIT || target.dataset.econCrossrefTitle === title) return;
+    target.dataset.econCrossrefTitle = title;
+    crossrefCount++;
+    browser.runtime.sendMessage({ type: 'econ.resolveCrossref', title, author, year })
+      .then(record => {
+        if (!record?.venue || !target.isConnected || target.textContent !== currentText) return;
+        if (matches(record.venue, ranks).length) {
+          decorate(target, record.venue);
+          target.dataset.econVerifiedVenue = record.venue;
+        }
+      }).catch(() => {});
+  }
   function scholar() {
     document.querySelectorAll('.gs_ri').forEach(result => {
       const source = result.querySelector('.gs_a');
       if (!source) return;
-      const parts = source.textContent.split(/\s[-–—]\s/);
-      // Journal abbreviations are in the venue metadata, not the paper title.
-      // Some Scholar layouts omit the author/venue separator entirely.
-      decorate(source, parts.length >= 2 ? parts[1] : source.textContent);
+      const original = source.textContent.trim();
+      const parts = original.split(/\s[-–—]\s/);
+      const venue = parts.length > 1 ? parts[1] : original;
+      if (matches(venue, ranks).length) {
+        decorate(source, venue);
+        return;
+      }
+      const title = result.querySelector('h3.gs_rt a, h3.gs_rt')?.textContent?.trim() || '';
+      const year = Number((venue.match(/\b(?:19|20)\d{2}\b/) || [])[0]) || null;
+      const author = parts.length > 1 ? parts[0].split(',')[0].replace(/…/g, '').trim() : '';
+      scholarLookup(source, original, venue, title, author, year);
     });
-    // Scholar profiles: first .gs_gray lists authors, second lists venue.
     document.querySelectorAll('tr.gsc_a_tr').forEach(result => {
       const lines = result.querySelectorAll('.gsc_a_t .gs_gray');
-      if (lines.length > 1) decorate(lines[1], lines[1].textContent);
+      if (lines.length < 2) return;
+      const venue = lines[1].textContent.trim();
+      if (matches(venue, ranks).length) {
+        decorate(lines[1], venue);
+      } else {
+        const title = result.querySelector('.gsc_a_t > a')?.textContent?.trim() || '';
+        const year = Number(result.querySelector('.gsc_a_y')?.textContent?.trim()) || null;
+        scholarLookup(lines[1], venue, venue, title, lines[0].textContent.split(',')[0], year);
+      }
     });
   }
   function wos() {
