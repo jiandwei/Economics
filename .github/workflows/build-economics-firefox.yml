@@ -50,6 +50,9 @@ jobs:
             node --check "$script"
           done < <(find economics-firefox -type f -name '*.js' -print0)
 
+      - name: Test journal recognition
+        run: node economics-firefox/tests/matching.test.cjs
+
       - name: Build Firefox XPI
         shell: bash
         run: |
