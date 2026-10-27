@@ -77,25 +77,24 @@ for (const filename of ['data/journals.js', 'data/chinese-journals.js', 'js/matc
 (async () => {
   await new Promise(resolve => setImmediate(resolve));
   const wrap = cell => cell.querySelector(':scope > .econ-badges--cnki');
-  assert.ok(wrap(first.cell), 'CSSCI badge must render inside source cell');
-  assert.ok(wrap(second.cell), 'Second journal badges must render');
-  assert.ok(wrap(third.cell), 'Non-linked source cell must render');
-  assert.ok(wrap(fourth.cell), 'English source inside CNKI must render');
-  assert.ok(wrap(fourth.cell).textContent.includes('FT50'), 'Journal of Operations Management FT50');
-  assert.ok(wrap(fourth.cell).textContent.includes('UTD24'), 'Journal of Operations Management UTD24');
+  assert.equal(wrap(first.cell), null, 'Unranked Chinese source should not receive a badge');
+  assert.ok(wrap(second.cell), 'School-ranked journal should render');
+  assert.equal(wrap(third.cell), null, 'No CSSCI/PKU/AMI badges in streamlined edition');
+  assert.ok(wrap(fourth.cell), 'English source should render');
+  assert.ok(wrap(fourth.cell).textContent.includes('FT50'));
+  assert.ok(wrap(fourth.cell).textContent.includes('UTD24'));
   for (const fixture of [first, second, third, fourth]) {
     assert.equal(fixture.row.children.length, 1, 'No extra child may appear alongside td');
-    assert.equal(wrap(fixture.cell).parentNode, fixture.cell, 'Badges must be children of source td');
+    if (wrap(fixture.cell)) assert.equal(wrap(fixture.cell).parentNode, fixture.cell);
   }
-  assert.ok(wrap(first.cell).textContent.includes('CSSCI'));
-  assert.ok(!wrap(first.cell).textContent.includes('A'), 'No partial match with 世界经济');
-  assert.ok(wrap(second.cell).textContent.includes('A'), 'School tag appears only on exact journal');
-  assert.ok(wrap(third.cell).textContent.includes('CSSCI'));
+  assert.ok(wrap(second.cell).textContent.includes('A'));
+  assert.ok(!wrap(second.cell).textContent.includes('CSSCI'));
   scanCallback();
-  assert.equal(first.cell.children.filter(el => el.classList.contains('econ-badges--cnki')).length, 1, 'No duplicate badges after rescan');
-  first.cell.querySelector('a').textContent = '经济研究';
+  assert.equal(second.cell.children.filter(el => el.classList.contains('econ-badges--cnki')).length, 1, 'No duplicates');
+  first.cell.querySelector('a').textContent = 'Journal of Operations Management';
   scanCallback();
-  assert.equal(first.cell.children.filter(el => el.classList.contains('econ-badges--cnki')).length, 1, 'Badges replaced after SPA content update');
-  assert.ok(wrap(first.cell).textContent.includes('AMI'), 'New venue classification applied');
+  assert.ok(wrap(first.cell), 'Updated source should be classified');
+  assert.ok(wrap(first.cell).textContent.includes('FT50'));
+  assert.ok(wrap(first.cell).textContent.includes('UTD24'));
   console.log('CNKI source-column layout tests passed');
 })().catch(err => { console.error(err); process.exitCode = 1; });
