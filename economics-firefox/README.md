@@ -30,3 +30,12 @@ JSON alternative: `[{"title":"Journal of Economic Theory","level":"A类"}]`.
 - FT50 (2026 revised): https://www.ft.com/ft50-journals and https://guides.lib.purdue.edu/ft50
 
 FT50 is a business-school research journal basket, not a ranking of strictly economics-only journals; UTD24 is also cross-disciplinary. Lists change and should be rechecked before formal assessments. The FT50 list is an initial curated candidate list and should be independently audited against the authoritative 2026 list before publication. Site DOM changes can affect badges; this is a first working implementation, not yet browser-verified.
+
+## CNKI & Chinese journal lists (v0.2.0)
+- CNKI `kns.cnki.net`, `navi.cnki.net` and common mirrors; rankings are attached to **source journal**, not article titles.
+- Built-in CSSCI 2025–2026 (economics subset), PKU Core 2023 (economics and related subject subset), AMI 2022 (limited subset). These are **partial directories** and need careful verification against authoritative catalogues; do not use as formal assessment.
+- Locally import school journal CSV/JSON. Either `title,level` or `期刊名称,学校等级,CSSCI,北大核心,AMI` headers. `CSSCI`/`北大核心` accept `是`; `AMI` accepts a textual level.
+- Reference: CSSCI 2025–2026 https://rwskc.zust.edu.cn/__local/3/CB/3F/ADA3D8675FEDE867F8F7B11E39E_8198B043_2A396.pdf
+- Reference: PKU Core 2023 https://www.wifa.edu.cn/upload/20240923/d4b8a60dc932f2593f8fb7322a2aa0b2.pdf
+- AMI source should be independently checked before formal use.
+- CNKI changes site layout periodically; selectors need testing on your logged-in browser.
