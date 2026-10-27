@@ -14,23 +14,66 @@ function valid(message) {
     typeof message.title === 'string' &&
     message.title.trim().length >= 14 && message.title.length <= 240 &&
     (!message.author || (typeof message.author === 'string' && message.author.length <= 90)) &&
-    (!message.year || (Number.isInteger(message.year) && message.year >= 1900 && message.year <= 2100));
+    (!message.year || (Number.isInteger(message.year) && message.year >= 1900 && message.year <= 2100)) &&
+    (!message.doi || econValidDoi(message.doi));
 }
-async function retrieve(query) {
-  // Saved address is optional; invalid values fall back to anonymous access.
-  const saved = await browser.storage.local.get('crossrefEmail').catch(() => ({}));
-  const url = econCrossrefRequestUrl(query.title, saved.crossrefEmail);
+// Public Crossref search requests are paced; one request is made at a time.
+let econLastFetchTime = 0;
+async function econFetchJson(urlString) {
+  const wait = Math.max(0, 1100 - (Date.now() - econLastFetchTime));
+  if (wait) await new Promise(resolve => setTimeout(resolve, wait));
+  econLastFetchTime = Date.now();
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 7000);
+  const timer = setTimeout(() => controller.abort(), 7500);
   try {
-    const response = await fetch(url.toString(), { signal: controller.signal });
-    if (!response.ok) return { value: null, shouldCache: false };
-    const data = await response.json();
-    return { value: econSelectCrossrefVenue(data?.message?.items, query), shouldCache: true };
+    const response = await fetch(urlString, {signal: controller.signal});
+    if (!response.ok) return { ok:false, status:response.status, data:null };
+    return { ok:true, status:response.status, data:await response.json() };
   } finally { clearTimeout(timer); }
 }
+async function retrieve(query) {
+  const saved = await browser.storage.local.get('crossrefEmail').catch(() => ({}));
+  const email = saved.crossrefEmail;
+  if (query.doi) {
+    const exactUrl = econCrossrefDoiUrl(query.doi, email);
+    const exact = await econFetchJson(exactUrl);
+    if (exact.ok) {
+      const result = econSelectCrossrefVenue([exact.data?.message], query);
+      if (result) return {value:result,shouldCache:true};
+    }
+    // Errors such as rate limiting and server outages must not fan out into
+    // additional API calls. A 404/mismatched record can fall back to title.
+    if (!exact.ok && exact.status !== 404) return {value:null,shouldCache:false};
+  }
+  const url = econCrossrefRequestUrl(query.title, email);
+  const response = await econFetchJson(url);
+  if (!response.ok) return {value:null,shouldCache:false};
+  return {
+    value:econSelectCrossrefVenue(response.data?.message?.items,query),
+    shouldCache:true
+  };
+}
+async function testCrossrefConnection() {
+  const data = await browser.storage.local.get('crossrefEmail').catch(() => ({}));
+  const validEmail = econNormalizeContactEmail(data.crossrefEmail);
+  const url = econCrossrefProbeUrl(validEmail);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(),7000);
+  try {
+    const response = await fetch(url,{signal:controller.signal,cache:'no-store'});
+    const pool = String(response.headers.get('x-api-pool') || '').toLowerCase();
+    return {
+      ok:response.ok,
+      status:response.status,
+      pool: ['polite','public'].includes(pool) ? pool : 'unknown',
+      emailConfigured:!!validEmail
+    };
+  } catch (_) {
+    return {ok:false,status:null,pool:'unknown',emailConfigured:!!validEmail};
+  } finally {clearTimeout(timer);}
+}
 async function resolve(query) {
-  const key = econNormalTitle(query.title) + '|' + query.year + '|' + econNormalTitle(query.author);
+  const key = econNormalTitle(query.title) + '|' + query.year + '|' + econNormalTitle(query.author) + '|' + (query.doi || '');
   const cache = await getCache();
   if (cache[key] && cache[key].expires > Date.now()) return cache[key].value;
   if (pending.has(key)) return pending.get(key);
@@ -52,8 +95,19 @@ async function resolve(query) {
   pending.set(key, task);
   try { return await task; } finally { pending.delete(key); }
 }
-browser.runtime.onMessage.addListener((msg, sender) => {
+browser.runtime.onMessage.addListener((msg,sender) => {
+  // Only the extension's own settings page may run a connection diagnostic.
+  if (msg?.type === 'econ.testCrossref') {
+    const ownedUrl = browser.runtime.getURL('');
+    if (String(sender?.url || '').startsWith(ownedUrl)) return testCrossrefConnection();
+    return;
+  }
   if (!valid(msg) ||
-    !/^https:\/\/scholar\.google\.[a-z.]+(?:\/|$)/i.test(String(sender?.url || ''))) return;
-  return resolve({ title: msg.title.trim(), author: String(msg.author || '').trim(), year: msg.year || null });
+      !/^https:\/\/scholar\.google\.[a-z.]+(?:\/|$)/i.test(String(sender?.url || ''))) return;
+  return resolve({
+    title:msg.title.trim(),
+    author:String(msg.author || '').trim(),
+    year:msg.year || null,
+    doi:msg.doi || null
+  });
 });

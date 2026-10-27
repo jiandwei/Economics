@@ -34,3 +34,19 @@ function econCrossrefRequestUrl(title, contactEmail) {
   if (email) url.searchParams.set('mailto', email);
   return url.toString();
 }
+
+function econCrossrefDoiUrl(doi, contactEmail) {
+  if (!econValidDoi(doi)) throw Error('Invalid DOI');
+  const path = doi.split('/').map(encodeURIComponent).join('/');
+  const url = new URL('https://api.crossref.org/works/' + path);
+  const email = econNormalizeContactEmail(contactEmail);
+  if (email) url.searchParams.set('mailto', email);
+  return url.toString();
+}
+function econCrossrefProbeUrl(contactEmail) {
+  const url = new URL('https://api.crossref.org/works');
+  url.searchParams.set('rows', '0');
+  const email = econNormalizeContactEmail(contactEmail);
+  if (email) url.searchParams.set('mailto', email);
+  return url.toString();
+}

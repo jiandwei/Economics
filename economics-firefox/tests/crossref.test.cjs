@@ -17,3 +17,12 @@ assert.equal(choose([record,{...record,'container-title':['Journal of Supply Cha
 assert.equal(choose([{...record,title:[title+'!']}],query).venue,'Journal of Operations Management');
 assert.equal(choose([],query),null);
 console.log('Crossref resolution tests passed');
+
+const doiContext=vm.createContext({URL});
+vm.runInContext(fs.readFileSync(path.join(__dirname,'../js/doi.js'),'utf8'),doiContext);
+const extract=href=>vm.runInContext('econExtractDoi('+JSON.stringify(href)+')',doiContext);
+assert.equal(extract('https://onlinelibrary.wiley.com/doi/abs/10.1002/joom.70037'),'10.1002/joom.70037');
+assert.equal(extract('https://doi.org/10.1002/joom.70037'),'10.1002/joom.70037');
+assert.equal(extract('https://www.sciencedirect.com/science/article/pii/S12345678'),null);
+assert.equal(extract('https://scholar.google.com/scholar?q=10.1002/joom.70037'),null);
+console.log('DOI publisher URL extraction tests passed');

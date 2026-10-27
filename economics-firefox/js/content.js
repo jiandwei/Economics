@@ -66,13 +66,13 @@
     target.dataset.econTagged = '1';
   }
   // CCFrank-style fallback: resolve a canonical journal from paper metadata.
-  function scholarLookup(target, currentText, venue, title, author, year) {
+  function scholarLookup(target, currentText, venue, title, author, year, doi = null) {
     if (store.enabled?.crossrefResolve === false || !/(?:…|\.{3})/.test(venue)) return;
     if (!title || title.length < 14 || title.includes('…') || title.includes('...')) return;
     if (crossrefCount >= CROSSREF_PAGE_LIMIT || target.dataset.econCrossrefTitle === title) return;
     target.dataset.econCrossrefTitle = title;
     crossrefCount++;
-    browser.runtime.sendMessage({ type: 'econ.resolveCrossref', title, author, year })
+    browser.runtime.sendMessage({ type: 'econ.resolveCrossref', title, author, year, doi })
       .then(record => {
         if (!record?.venue || !target.isConnected || target.textContent !== currentText) return;
         if (matches(record.venue, ranks).length) {
@@ -95,7 +95,9 @@
       const title = result.querySelector('h3.gs_rt a, h3.gs_rt')?.textContent?.trim() || '';
       const year = Number((venue.match(/\b(?:19|20)\d{2}\b/) || [])[0]) || null;
       const author = parts.length > 1 ? parts[0].split(',')[0].replace(/…/g, '').trim() : '';
-      scholarLookup(source, original, venue, title, author, year);
+      const link = result.querySelector('h3.gs_rt a')?.href || '';
+      const doi = econExtractDoi(link);
+      scholarLookup(source, original, venue, title, author, year, doi);
     });
     document.querySelectorAll('tr.gsc_a_tr').forEach(result => {
       const lines = result.querySelectorAll('.gsc_a_t .gs_gray');

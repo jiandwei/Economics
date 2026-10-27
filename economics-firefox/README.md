@@ -59,3 +59,9 @@ The options page accepts an optional contact email from 163, 126, QQ, Gmail, Out
 It is validated in both the options page and the background script. Only valid values are stored as `crossrefEmail` in Firefox `browser.storage.local`. For new Crossref metadata lookups, the address is added to the official HTTPS `mailto` query parameter. With an empty or invalid value, the extension continues to use the public pool. Cached results do not send new requests. The email is not put in the GitHub repository or XPI. Crossref may use it to contact you about API use; only enter an address you control.
 
 Official documentation: https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication
+
+## v0.3.2 – Connection diagnostics and publisher DOI fallback
+- Settings page offers **Test Crossref connection** after saving the optional email; probes the works API and reports the `x-api-pool` value when present. The status never displays the saved email.
+- When a Google Scholar title hyperlink includes a publisher DOI, the background first queries `/works/{DOI}`, and still verifies paper title, year, and author before using the journal `container-title`. A 404 or title mismatch falls back to title search. Rate limit/server errors do not trigger a second request.
+- All Crossref lookups remain opt-out, batched sequentially, cached locally. API queries are rate paced to avoid overloading the public service.
+- Your test paper: DOI `10.1002/joom.70037` published in Journal of Operations Management (publisher-verified); should receive FT50 and UTD24 when the journal metadata can be resolved.

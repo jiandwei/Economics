@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const c=vm.createContext({URL});
+for(const file of ['doi.js','politeEmail.js']) vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',file),'utf8'),c);
+const evalCode=expr=>vm.runInContext(expr,c);
+const url=new URL(evalCode("econCrossrefDoiUrl('10.1002/joom.70037','contact@pku.edu.cn')"));
+assert.equal(url.pathname,'/works/10.1002/joom.70037');
+assert.equal(url.searchParams.get('mailto'),'contact@pku.edu.cn');
+assert.equal(new URL(evalCode("econCrossrefProbeUrl('example@gmail.com')")).searchParams.get('rows'),'0');
+assert.equal(new URL(evalCode("econCrossrefProbeUrl('example@gmail.com')")).searchParams.get('mailto'),'example@gmail.com');
+assert.equal(new URL(evalCode("econCrossrefProbeUrl('')")).searchParams.has('mailto'),false);
+assert.throws(()=>evalCode("econCrossrefDoiUrl('not-a-doi','test@qq.com')"));
+console.log('Crossref DOI and connection probe URL tests passed');
