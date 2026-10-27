@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Economics Journal Tags · 设置</title><link rel="stylesheet" href="options.css"></head>
+<body><main><h1>Economics Journal Tags</h1><p class="muted">经济学 TOP5 · Financial Times FT50 · UT Dallas UTD24 · 学校期刊目录</p>
+<section><h2>显示标签</h2><label><input type="checkbox" id="top5"> TOP5 · 经济学五大顶刊</label>
+<label><input type="checkbox" id="ft50"> FT50 · 2026 年版</label>
+<label><input type="checkbox" id="utd24"> UTD24 · 24 种商学院期刊</label>
+<label><input type="checkbox" id="school"> 学校期刊目录（用户自定义）</label></section>
+<section><h2>学校期刊目录</h2><label for="schoolName">学校名称 / 标签前缀</label><input id="schoolName" type="text" maxlength="35" placeholder="例如：某大学经管学院">
+<p>从学校正式公布的名单中制作 CSV 或 JSON 导入。插件不会推测学校等级，也不会上传文件。</p>
+<p><code>journal,level,aliases</code> 三列；<code>aliases</code> 可选，多个别名用 <code>|</code> 分隔。</p>
+<pre>journal,level,aliases
+Journal of Economic Theory,A类,J Econ Theory|JET
+Journal of Econometrics,B类,J Econometrics</pre>
+<div class="actions"><label for="upload" class="button">导入 CSV / JSON</label><input id="upload" type="file" accept=".csv,.json,text/csv,application/json" hidden>
+<button id="export">导出当前目录 JSON</button><button class="danger" id="clear">清空学校目录</button></div>
+<p id="count" class="muted"></p></section>
+<section><h2>数据来源与说明</h2><p>内置 TOP5 为学界常见的经济学五大期刊集合；FT50 使用 2026 年 4 月版本；UTD24 根据 UT Dallas 发布的 24 种期刊目录。各体系独立，不应相互等同。</p>
+<p><a href="https://econ.fss.um.edu.mo/journal-list/" target="_blank" rel="noreferrer">TOP5</a> · <a href="https://www.ft.com/content/db863a0a-6524-45f9-bc52-fee997634bdc" target="_blank" rel="noreferrer">FT50</a> · <a href="https://jsom.utdallas.edu/the-utd-top-100-business-school-research-rankings/list-of-journals" target="_blank" rel="noreferrer">UTD24</a></p></section>
+<p id="status" role="status" aria-live="polite"></p></main><script src="options.js"></script></body></html>

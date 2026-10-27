@@ -1,0 +1,1 @@
+"use strict";const api=typeof browser!=="undefined"?browser:chrome;document.getElementById("open").addEventListener("click",()=>api.runtime.openOptionsPage());api.storage.local.get({schoolJournals:[]}).then(v=>{document.getElementById("count").textContent="学校目录："+(v.schoolJournals||[]).length+" 种期刊";});
