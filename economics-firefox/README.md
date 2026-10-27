@@ -52,3 +52,10 @@ Both `FT50` and `UTD24` contain **Journal of Operations Management**. Recognizes
 CCFrank4dblp obtains Scholar paper titles and sends independent DBLP API requests; it does not capture private Scholar traffic. Here the economics extension uses Crossref REST API by article title when Scholar's venue is visibly truncated. Crossref provides the complete container-title; existing local rankings assign FT50/UTD24/TOP5 badges. Requests are sent by the Firefox background script, limited to eight per page and serialized, with a 30-day positive/1-day negative browser-local cache. We require closely matched title, publication year when known, and author when present, and reject ambiguous records. A missing Crossref record cannot be labelled. The settings panel allows opting out of external lookups; this feature sends the public article title, year and author to api.crossref.org, not Scholar cookies or CNKI data.
 
 Crossref docs: https://www.crossref.org/documentation/retrieve-metadata/rest-api/
+
+## v0.3.1 – Optional Crossref polite pool email
+The options page accepts an optional contact email from 163, 126, QQ, Gmail, Outlook and other common/academic provider domains (including nested .edu.cn, .edu, .ac.cn, .ac.uk). This is an extension allowlist, not a Crossref API requirement.
+
+It is validated in both the options page and the background script. Only valid values are stored as `crossrefEmail` in Firefox `browser.storage.local`. For new Crossref metadata lookups, the address is added to the official HTTPS `mailto` query parameter. With an empty or invalid value, the extension continues to use the public pool. Cached results do not send new requests. The email is not put in the GitHub repository or XPI. Crossref may use it to contact you about API use; only enter an address you control.
+
+Official documentation: https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication

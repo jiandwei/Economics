@@ -17,11 +17,9 @@ function valid(message) {
     (!message.year || (Number.isInteger(message.year) && message.year >= 1900 && message.year <= 2100));
 }
 async function retrieve(query) {
-  const url = new URL('https://api.crossref.org/works');
-  url.searchParams.set('query.title', query.title);
-  url.searchParams.set('filter', 'type:journal-article');
-  url.searchParams.set('rows', '5');
-  url.searchParams.set('select', 'title,container-title,author,published,issued,DOI,type');
+  // Saved address is optional; invalid values fall back to anonymous access.
+  const saved = await browser.storage.local.get('crossrefEmail').catch(() => ({}));
+  const url = econCrossrefRequestUrl(query.title, saved.crossrefEmail);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 7000);
   try {

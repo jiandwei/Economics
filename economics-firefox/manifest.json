@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Economics Journal Tags",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Economics and Chinese journal tags: TOP5 FT50 UTD24 CSSCI PKU AMI and school",
   "permissions": [
     "storage"
@@ -15,6 +15,7 @@
   },
   "background": {
     "scripts": [
+      "js/politeEmail.js",
       "js/resolveVenue.js",
       "background.js"
     ]

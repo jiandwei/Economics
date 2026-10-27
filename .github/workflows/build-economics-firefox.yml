@@ -59,6 +59,9 @@ jobs:
       - name: Test Crossref metadata resolution
         run: node economics-firefox/tests/crossref.test.cjs
 
+      - name: Test Crossref polite pool email policy
+        run: node economics-firefox/tests/polite-email.test.cjs
+
       - name: Build Firefox XPI
         shell: bash
         run: |
