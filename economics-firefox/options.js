@@ -1,0 +1,9 @@
+const $=id=>document.getElementById(id);
+const keys=['top5','ft50','utd24','school'];
+function csv(text){return text.replace(/^\uFEFF/,'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map((line,i)=>{let m=line.match(/^\s*(?:"([^"]*(?:""[^"]*)*)"|([^,]*))\s*,\s*(?:"([^"]*(?:""[^"]*)*)"|(.+))\s*$/);if(!m)throw Error('第 '+(i+1)+' 行格式不正确');return {title:(m[1]||m[2]).replace(/""/g,'"').trim(),level:(m[3]||m[4]).replace(/""/g,'"').trim()}}).filter((r,i)=>!(i===0&&r.title.toLowerCase()==='title'))}
+async function init(){let v=await browser.storage.local.get({schoolJournals:[],enabled:{top5:true,ft50:true,utd24:true,school:true}});keys.forEach(k=>$(k).checked=v.enabled[k]!==false);$('data').value=v.schoolJournals.map(r=>r.title+','+r.level).join('\n')}
+$('save').onclick=async()=>{try{let rows=csv($('data').value);if(rows.some(r=>!r.title||!r.level)||rows.length>10000)throw Error('目录不能为空值且最多10000行');await browser.storage.local.set({schoolJournals:rows,enabled:Object.fromEntries(keys.map(k=>[k,$(k).checked]))});$('status').textContent='已保存 '+rows.length+' 条学校目录记录，刷新文献网页生效。'}catch(e){$('status').textContent=e.message}};
+$('upload').onchange=async e=>{let f=e.target.files?.[0];if(!f)return;try{let t=await f.text();let rows=f.name.toLowerCase().endsWith('.json')?JSON.parse(t):csv(t);if(!Array.isArray(rows))throw Error('JSON 应为 [{title,level}] 数组');$('data').value=rows.map(r=>r.title+','+r.level).join('\n');$('status').textContent='已读取文件，请点击保存目录';}catch(e){$('status').textContent='导入失败：'+e.message}};
+$('clear').onclick=async()=>{$('data').value='';await browser.storage.local.set({schoolJournals:[]});$('status').textContent='已清空学校目录'};
+$('download').onclick=()=>{let blob=new Blob(['title,level\n'+$('data').value],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='school-journals.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+init();

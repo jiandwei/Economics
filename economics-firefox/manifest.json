@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Economics Journal Tags",
+  "version": "0.1.0",
+  "description": "Economics TOP5, FT50, UTD24 and local school journal badges",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_title": "期刊目录设置"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://scholar.google.*/*",
+        "*://dblp.org/*",
+        "*://dblp.uni-trier.de/*",
+        "*://www.webofscience.com/*",
+        "*://webofscience.clarivate.cn/*",
+        "*://www.semanticscholar.org/*"
+      ],
+      "js": [
+        "data/journals.js",
+        "js/matcher.js",
+        "js/content.js"
+      ],
+      "css": [
+        "css/badges.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "economics-journal-tags@jiandwei.github.io",
+      "strict_min_version": "109.0"
+    }
+  }
+}

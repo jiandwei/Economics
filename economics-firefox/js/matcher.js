@@ -1,0 +1,4 @@
+function norm(s){return String(s||'').normalize('NFKC').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ')}
+const titleKey=(s)=>norm((ECON_ALIASES[norm(s)]||s).replace(/^the\s+/i,''));
+function catalog(custom){let out=new Map();for(const [group,arr] of Object.entries(ECON_LISTS)){for(const title of arr){let k=titleKey(title);if(!out.has(k))out.set(k,{title,groups:[]});out.get(k).groups.push(group)}}for(const row of (custom||[])){if(!row||!row.title)continue;const k=titleKey(row.title);if(!out.has(k))out.set(k,{title:row.title,groups:[]});out.get(k).school=String(row.level||'学校目录').slice(0,48)}return out}
+function matches(text,map){let n=norm(text),out=[];if(!n)return out;for(const [key,entry] of map){if(!key||key.length<8)continue;let re=new RegExp('(?:^|\\s)'+key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:$|\\s)');if(re.test(n))out.push(entry)}return out.sort((a,b)=>b.title.length-a.title.length).slice(0,2)}
