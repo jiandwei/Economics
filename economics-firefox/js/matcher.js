@@ -4,6 +4,7 @@ function norm(text) {
     .replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
 }
 function titleKey(text) {
+  if (/[\u3400-\u9fff]/u.test(String(text))) return chineseJournalKey(text);
   const normalized = norm(text);
   return norm(ECON_ALIASES[normalized] || text).replace(/^the /, '');
 }
@@ -42,6 +43,47 @@ const JOURNAL_ABBREVIATIONS = {
   'j int bus stud': 'Journal of International Business Studies',
   'strateg manage j': 'Strategic Management Journal'
 };
+
+// Preserve Chinese characters in journal keys.
+function chineseRawKey(text) {
+  return String(text || '').normalize('NFKC').toLowerCase()
+    .replace(/[《》〈〉“”‘’·.,，。:：;；\s（）()\[\]【】\-—–]/g, '');
+}
+function chineseJournalKey(name) {
+  const raw = chineseRawKey(name);
+  const aliases = typeof CHINESE_CATALOG === 'undefined' ? {} : CHINESE_CATALOG.aliases;
+  for (const [alias, actual] of Object.entries(aliases || {})) {
+    if (chineseRawKey(alias) === raw) return chineseRawKey(actual);
+  }
+  return raw;
+}
+function chineseVenueKey(text) {
+  const raw = String(text || '').normalize('NFKC').trim().replace(/^来源[:：]\s*/, '');
+  const trimmed = raw.replace(/[，,]\s*(?:19|20)\d{2}.*$/, '')
+    .replace(/^《(.+)》$/, '$1').trim();
+  if (!/[\u3400-\u9fff]/u.test(trimmed)) return '';
+  return chineseJournalKey(trimmed);
+}
+function truthyMembership(value) {
+  return value === true || value === 1 || ['1','true','yes','y','是','来源','入选','核心'].includes(String(value||'').trim().toLowerCase());
+}
+function addChineseCatalog(map) {
+  if (typeof CHINESE_CATALOG === 'undefined') return;
+  for (const group of ['cssci','pku']) {
+    for (const title of CHINESE_CATALOG[group].journals) {
+      const key=chineseJournalKey(title);
+      if (!map.has(key)) map.set(key,{ title, groups: [] });
+      const entry=map.get(key);
+      if (!entry.groups.includes(group)) entry.groups.push(group);
+    }
+  }
+  for (const [title,grade] of Object.entries(CHINESE_CATALOG.ami.grades)) {
+    const key=chineseJournalKey(title);
+    if (!map.has(key)) map.set(key,{ title, groups:[] });
+    Object.assign(map.get(key),{ami:grade,amiYear:'2022'});
+  }
+}
+
 function catalog(custom) {
   const out = new Map();
   for (const [group, names] of Object.entries(ECON_LISTS)) {
@@ -51,11 +93,16 @@ function catalog(custom) {
       if (!out.get(key).groups.includes(group)) out.get(key).groups.push(group);
     }
   }
+  addChineseCatalog(out);
   for (const row of (Array.isArray(custom) ? custom : [])) {
     if (!row || typeof row.title !== 'string' || !row.title.trim()) continue;
     const key = titleKey(row.title);
     if (!out.has(key)) out.set(key, { title: row.title, groups: [] });
-    out.get(key).school = String(row.level || '学校目录').slice(0, 48);
+    const entry = out.get(key);
+    if (row.level) entry.school = String(row.level).slice(0, 48);
+    if (truthyMembership(row.cssci) && !entry.groups.includes('cssci')) entry.groups.push('cssci');
+    if (truthyMembership(row.pku) && !entry.groups.includes('pku')) entry.groups.push('pku');
+    if (row.ami) { entry.ami = String(row.ami).slice(0, 30); entry.amiYear = '导入'; }
   }
   return out;
 }
@@ -65,6 +112,8 @@ function containsPhrase(source, phrase) {
 }
 // Caller supplies the venue field (NOT title/abstract/author fields).
 function matches(venue, map) {
+  const chineseKey = chineseVenueKey(venue);
+  if (chineseKey && map.has(chineseKey)) return [map.get(chineseKey)];
   const text = norm(venue);
   if (!text) return [];
   const found = new Map();

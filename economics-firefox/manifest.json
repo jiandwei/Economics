@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Economics Journal Tags",
-  "version": "0.1.1",
-  "description": "Economics TOP5, FT50, UTD24 and local school journal badges",
+  "version": "0.2.0",
+  "description": "Economics and Chinese journal tags: TOP5 FT50 UTD24 CSSCI PKU AMI and school",
   "permissions": [
     "storage"
   ],
@@ -35,10 +35,16 @@
         "*://dblp.uni-trier.de/*",
         "*://www.webofscience.com/*",
         "*://webofscience.clarivate.cn/*",
-        "*://www.semanticscholar.org/*"
+        "*://www.semanticscholar.org/*",
+        "*://kns.cnki.net/*",
+        "*://navi.cnki.net/*",
+        "*://www.cnki.net/*",
+        "*://oversea.cnki.net/*",
+        "*://kns8.cnki.net/*"
       ],
       "js": [
         "data/journals.js",
+        "data/chinese-journals.js",
         "js/matcher.js",
         "js/content.js"
       ],

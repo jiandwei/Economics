@@ -1,5 +1,5 @@
 (async function () {
-  const defaults = { schoolJournals: [], enabled: { top5: true, ft50: true, utd24: true, school: true } };
+  const defaults = { schoolJournals: [], enabled: { top5: true, ft50: true, utd24: true, cssci: true, pku: true, ami: true, school: true } };
   let store;
   try {
     store = await browser.storage.local.get(defaults);
@@ -8,8 +8,8 @@
     store = defaults;
   }
   const ranks = catalog(store.schoolJournals);
-  const classes = { top5: 'econ-top5', ft50: 'econ-ft50', utd24: 'econ-utd' };
-  const names = { top5: 'TOP5', ft50: 'FT50', utd24: 'UTD24' };
+  const classes = { top5: 'econ-top5', ft50: 'econ-ft50', utd24: 'econ-utd', cssci: 'econ-cssci', pku: 'econ-pku' };
+  const names = { top5: 'TOP5', ft50: 'FT50', utd24: 'UTD24', cssci: 'CSSCI', pku: '北大核心' };
 
   function decorate(target, venue) {
     if (!target || !venue || target.dataset.econTagged === '1') return;
@@ -25,7 +25,14 @@
         const badge = document.createElement('span');
         badge.className = 'econ-badge ' + classes[group];
         badge.textContent = names[group];
-        badge.title = journal.title;
+        badge.title = journal.title + (group === 'cssci' ? ' · CSSCI 2025–2026（经济学）' : group === 'pku' ? ' · 北大核心 2023（经济类）' : '');
+        wrap.appendChild(badge);
+      }
+      if (journal.ami && store.enabled?.ami !== false) {
+        const badge = document.createElement('span');
+        badge.className = 'econ-badge econ-ami';
+        badge.textContent = 'AMI·' + journal.ami;
+        badge.title = 'AMI ' + (journal.amiYear || '2022') + '：' + journal.title;
         wrap.appendChild(badge);
       }
       if (journal.school && store.enabled?.school !== false) {
@@ -64,9 +71,23 @@
     // Paper titles are not publication venues.
     document.querySelectorAll('cite a[href*="/db/journals/"], cite [itemprop="isPartOf"], #breadcrumbs a[href*="/db/journals/"]').forEach(el => decorate(el, el.textContent));
   }
+  function cnki() {
+    // CNKI KNS8: only publication/source field, never title (td.name).
+    document.querySelectorAll('.result-table-list tbody tr').forEach(row => {
+      const source = row.querySelector('td.source a, td.source');
+      if (source) decorate(source, source.textContent.trim());
+    });
+    document.querySelectorAll('.briefDl_D .journalSpan, .briefDl_D .source a, .briefDl_D .source, .result-content .source a, a[href*="navi.cnki.net/knavi/detail"]').forEach(el => {
+      if (!el.closest('.result-table-list')) decorate(el, el.textContent.trim());
+    });
+    if (location.hostname.startsWith('navi.')) {
+      document.querySelectorAll('.journal-title, h1.journal-title, .journalTitle').forEach(el => decorate(el, el.textContent.trim()));
+    }
+  }
   function scan() {
     const host = location.hostname;
-    if (host.startsWith('scholar.google.')) scholar();
+    if (host.endsWith('.cnki.net') || host === 'cnki.net') cnki();
+    else if (host.startsWith('scholar.google.')) scholar();
     else if (host.includes('webofscience') || host.includes('clarivate')) wos();
     else if (host.includes('semanticscholar')) semanticScholar();
     else if (host.startsWith('dblp')) dblp();
