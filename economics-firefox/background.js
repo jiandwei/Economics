@@ -33,7 +33,18 @@ async function econFetchJson(urlString) {
 }
 async function retrieve(query) {
   const saved = await browser.storage.local.get('crossrefEmail').catch(() => ({}));
-  const email = saved.crossrefEmail;
+  // Browser-level consent is required for sending a user-provided contact email.
+  // A cached address from an older install must not bypass the consent system.
+  let email = '';
+  try {
+    const permissions = await browser.permissions.getAll();
+    if (Array.isArray(permissions.data_collection) &&
+        permissions.data_collection.includes('personallyIdentifyingInfo')) {
+      email = saved.crossrefEmail || '';
+    }
+  } catch (_) {
+    // Fail closed: requests without an email use the Crossref public pool.
+  }
   if (query.doi) {
     const exactUrl = econCrossrefDoiUrl(query.doi, email);
     const exact = await econFetchJson(exactUrl);

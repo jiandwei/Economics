@@ -65,6 +65,9 @@ jobs:
       - name: Test DOI-based Crossref requests
         run: node economics-firefox/tests/crossref-doi.test.cjs
 
+      - name: Verify Firefox data collection manifest
+        run: node economics-firefox/tests/data-consent.test.cjs
+
       - name: Build Firefox XPI
         shell: bash
         run: |

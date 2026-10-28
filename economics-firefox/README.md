@@ -68,3 +68,16 @@ Official documentation: https://www.crossref.org/documentation/retrieve-metadata
 
 ## v0.4.0 streamlined settings
 Only TOP5, FT50, UTD24 and school rankings are shown; Chinese CSSCI / PKU Core / AMI badges have been disabled in display logic. Crossref metadata resolution runs automatically in the background without a visible toggle. The connection-test button and its network probe handler were removed. Optional email is available in collapsed advanced settings. The settings use responsive two-column cards; school CSV import is under a separate collapsible section.
+
+## v0.4.1 – Firefox 140+ built-in data consent / AMO signing fix
+
+Manifest now declares `browser_specific_settings.gecko.data_collection_permissions`:
+- `required: ["websiteContent"]` because the add-on automatically sends publicly visible paper titles, years and DOI metadata to Crossref when the publication venue is truncated.
+- `optional: ["personallyIdentifyingInfo"]` for a user-entered contact email submitted via the `mailto` query parameter. Saving an address triggers the Firefox permissions consent prompt; declining does not save a new address.
+- The background checks `browser.permissions.getAll().data_collection` before using the saved email, including after migrating from earlier releases or after permission revocation.
+- `strict_min_version` is 140.0 for Firefox's built-in consent UI, avoiding unconsented transmissions on older versions.
+- The extension does not transfer login cookies, Scholar account data or CNKI authentication information, and does not conduct analytics or browser history collection. User-defined school rankings remain local.
+
+Mozilla docs: https://extensionworkshop.com/documentation/develop/firefox-builtin-data-consent/
+
+On AMO upload, developers must make matching data disclosures; this declaration is intentionally not `["none"]`.
