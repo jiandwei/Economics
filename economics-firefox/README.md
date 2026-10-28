@@ -81,3 +81,7 @@ Manifest now declares `browser_specific_settings.gecko.data_collection_permissio
 Mozilla docs: https://extensionworkshop.com/documentation/develop/firefox-builtin-data-consent/
 
 On AMO upload, developers must make matching data disclosures; this declaration is intentionally not `["none"]`.
+
+## v0.4.2 – Firefox minimum version 158
+
+The Firefox add-on manifest uses `browser_specific_settings.gecko.strict_min_version: "158.0"` as explicitly requested, with the existing built-in data consent declarations unchanged. This excludes Firefox versions older than 158 from installing the extension. Automated validation now expects the same minimum version. Build the new XPI and upload v0.4.2 to Mozilla Add-ons for signing.
