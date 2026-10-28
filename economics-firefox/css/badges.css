@@ -1,0 +1,29 @@
+.econ-badges{display:inline-flex;flex-wrap:wrap;vertical-align:middle;gap:4px;margin-left:6px}.econ-badge{display:inline-block;padding:2px 6px;border-radius:5px;font:600 11px/1.4 system-ui,sans-serif;color:#fff}.econ-top5{background:#a62626}.econ-ft50{background:#245bba}.econ-utd{background:#7045a2}.econ-school{background:#176f56}
+
+.econ-cssci{background:#b32f4a}.econ-pku{background:#c27312}.econ-ami{background:#2b7d83}
+
+/* CNKI results: keep badges inside the source column, below the journal name. */
+.econ-badges--cnki {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 4px;
+  margin: 5px 0 0;
+  padding: 0;
+  max-width: 100%;
+  line-height: 1.35;
+  vertical-align: baseline;
+}
+.econ-badges--cnki > .econ-badge {
+  display: inline-block;
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding: 2px 5px;
+  margin: 0;
+  white-space: nowrap;
+  border-radius: 4px;
+  text-shadow: none;
+  font-size: 11px;
+  line-height: 1.35;
+}

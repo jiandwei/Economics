@@ -1,0 +1,78 @@
+{
+  "manifest_version": 3,
+  "name": "Economics Journal Tags",
+  "version": "0.4.2",
+  "description": "Economics journal tags: TOP5, FT50, UTD24 and local school rankings",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_title": "期刊目录设置"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "scripts": [
+      "js/politeEmail.js",
+      "js/doi.js",
+      "js/resolveVenue.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://scholar.google.com/*",
+        "*://scholar.google.com.hk/*",
+        "*://scholar.google.co.uk/*",
+        "*://scholar.google.com.au/*",
+        "*://scholar.google.ca/*",
+        "*://scholar.google.de/*",
+        "*://scholar.google.fr/*",
+        "*://scholar.google.co.jp/*",
+        "*://scholar.google.com.sg/*",
+        "*://scholar.google.com.tw/*",
+        "*://dblp.org/*",
+        "*://dblp.uni-trier.de/*",
+        "*://www.webofscience.com/*",
+        "*://webofscience.clarivate.cn/*",
+        "*://www.semanticscholar.org/*",
+        "*://kns.cnki.net/*",
+        "*://navi.cnki.net/*",
+        "*://www.cnki.net/*",
+        "*://oversea.cnki.net/*",
+        "*://kns8.cnki.net/*"
+      ],
+      "js": [
+        "data/journals.js",
+        "data/chinese-journals.js",
+        "js/matcher.js",
+        "js/doi.js",
+        "js/content.js"
+      ],
+      "css": [
+        "css/badges.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "economics-journal-tags@jiandwei.github.io",
+      "strict_min_version": "158.0",
+      "data_collection_permissions": {
+        "required": [
+          "websiteContent"
+        ],
+        "optional": [
+          "personallyIdentifyingInfo"
+        ]
+      }
+    }
+  },
+  "host_permissions": [
+    "https://api.crossref.org/*"
+  ]
+}
